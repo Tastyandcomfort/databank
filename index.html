@@ -8,7 +8,7 @@
 
   <meta
     name="description"
-    content="Data Bank V3 - Mobile data rollover concept"
+    content="Data Bank V3 - Mobile data monitoring and rollover concept"
   >
 
   <link rel="stylesheet" href="style.css">
@@ -16,497 +16,522 @@
 
 <body>
 
-  <div class="background-glow glow-one"></div>
-  <div class="background-glow glow-two"></div>
+  <!-- TOP BAR -->
 
-  <!-- NAVBAR -->
+  <header class="topbar">
 
-  <header class="navbar glass">
-
-    <div class="brand">
-
-      <div class="brand-icon">
-        D
-      </div>
+    <div class="top-brand">
+      <div class="db-mark">DB</div>
 
       <div>
-        <div class="brand-name">
-          Data Bank
-        </div>
-
-        <div class="brand-version">
-          V3
-        </div>
+        <strong>Data Bank</strong>
+        <span>V3</span>
       </div>
-
     </div>
 
-    <div class="nav-right">
-
-      <div class="simulation-status">
-        <span></span>
-        SIMULATION
-      </div>
-
-      <button
-        id="themeToggle"
-        class="theme-button"
-        aria-label="Toggle theme"
-      >
-        ◐
-      </button>
-
+    <div class="network-pill" id="networkPill">
+      <i></i>
+      <span id="networkState">Checking network</span>
     </div>
 
   </header>
 
 
-  <main class="container">
+  <main>
 
-    <!-- HERO -->
 
-    <section class="hero">
+    <!-- HERO / MAIN DATA -->
 
-      <div class="eyebrow">
-        MOBILE DATA MANAGEMENT
+    <section class="dashboard-hero">
+
+      <div class="hero-top">
+
+        <div>
+          <p class="section-label">
+            DATA CONTROL CENTER
+          </p>
+
+          <h1>
+            Your data.<br>
+            Your bank.
+          </h1>
+
+          <p class="hero-description">
+            Monitor your connection, track available information
+            and manage eligible rollover data from one place.
+          </p>
+        </div>
+
+
+        <div class="live-indicator">
+          <span></span>
+          LIVE
+        </div>
+
       </div>
 
-      <h1>
-        Don't let your<br>
-        data disappear.
-      </h1>
 
-      <p>
-        Data Bank stores eligible unused data in a
-        simulated rollover account so you can visualize
-        how it could be used later.
-      </p>
+      <!-- DATA RING -->
+
+      <div class="data-ring-area">
+
+        <div class="data-ring">
+
+          <div class="ring-content">
+
+            <span class="ring-small">
+              AVAILABLE
+            </span>
+
+            <strong id="availableData">
+              1.20
+            </strong>
+
+            <span class="ring-unit">
+              GB
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="ring-info">
+
+          <div>
+            <span>Daily plan</span>
+            <strong id="dailyPlan">1.50 GB</strong>
+          </div>
+
+          <div>
+            <span>Used today</span>
+            <strong id="todayUsed">300 MB</strong>
+          </div>
+
+          <div>
+            <span>Banked</span>
+            <strong id="bankedData">700 MB</strong>
+          </div>
+
+        </div>
+
+      </div>
 
     </section>
 
 
     <!-- CONNECTION -->
 
-    <section class="glass connection-card">
+    <section class="connection-section">
 
-      <div class="connection-left">
-
-        <div class="network-icon">
-          ◉
-        </div>
+      <div class="section-heading">
 
         <div>
+          <p class="section-label">
+            CONNECTION
+          </p>
 
-          <span class="label">
-            CARRIER CONNECTION
-          </span>
-
-          <strong id="carrierName">
-            Demo Carrier
-          </strong>
-
+          <h2>
+            Device network
+          </h2>
         </div>
+
+        <span class="detected-badge">
+          AUTO DETECTED
+        </span>
 
       </div>
 
-      <div class="connection-state">
-        <span class="online-dot"></span>
-        <span id="connectionText">
-          Sandbox connected
-        </span>
+
+      <div class="connection-grid">
+
+        <article class="network-card primary-network">
+
+          <div class="network-card-icon">
+            ◉
+          </div>
+
+          <div>
+
+            <span>
+              Connection
+            </span>
+
+            <strong id="connectionType">
+              Detecting...
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="network-card">
+
+          <div class="network-card-icon speed-icon">
+            ↯
+          </div>
+
+          <div>
+
+            <span>
+              Estimated speed
+            </span>
+
+            <strong id="connectionSpeed">
+              —
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="network-card">
+
+          <div class="network-card-icon">
+            ◌
+          </div>
+
+          <div>
+
+            <span>
+              Latency
+            </span>
+
+            <strong id="connectionLatency">
+              —
+            </strong>
+
+          </div>
+
+        </article>
+
+
+        <article class="network-card">
+
+          <div class="network-card-icon">
+            ⇄
+          </div>
+
+          <div>
+
+            <span>
+              Data Saver
+            </span>
+
+            <strong id="dataSaver">
+              Checking...
+            </strong>
+
+          </div>
+
+        </article>
+
       </div>
 
     </section>
 
 
-    <!-- DATA BALANCE -->
+    <!-- CARRIER -->
 
-    <section class="glass balance-card">
+    <section class="carrier-section">
 
-      <div class="balance-header">
+      <div class="section-heading">
 
         <div>
+          <p class="section-label">
+            CARRIER
+          </p>
 
-          <span class="label">
-            TOTAL AVAILABLE
-          </span>
+          <h2>
+            Plan information
+          </h2>
+        </div>
 
-          <div class="big-balance">
+      </div>
 
-            <span id="totalBalance">
-              2.20
+
+      <div class="carrier-card">
+
+        <div class="carrier-main">
+
+          <div class="sim-icon">
+            SIM
+          </div>
+
+          <div>
+
+            <span>
+              Carrier quota
             </span>
 
-            <small>
-              GB
-            </small>
+            <strong id="carrierStatus">
+              Carrier data required
+            </strong>
+
+            <p>
+              A normal website cannot directly read
+              your carrier's billing balance.
+            </p>
 
           </div>
 
         </div>
 
-        <div class="balance-symbol">
-          ↗
-        </div>
+
+        <button
+          id="carrierButton"
+          class="outline-button"
+        >
+          Carrier Integration
+        </button>
 
       </div>
 
 
-      <div class="usage-bar">
-
-        <div
-          id="usageFill"
-          class="usage-fill"
-        ></div>
-
-      </div>
-
-
-      <div class="usage-details">
-
-        <span id="usedLabel">
-          Used 800 MB
-        </span>
-
-        <span id="availableLabel">
-          2.20 GB available
-        </span>
-
-      </div>
-
-
-      <div class="balance-grid">
-
-        <div>
-          <span>
-            Daily quota
-          </span>
-
-          <strong id="dailyQuota">
-            1.50 GB
-          </strong>
-        </div>
-
-        <div>
-          <span>
-            Banked
-          </span>
-
-          <strong id="bankedQuota">
-            700 MB
-          </strong>
-        </div>
-
-        <div>
-          <span>
-            Used today
-          </span>
-
-          <strong id="usedQuota">
-            800 MB
-          </strong>
-        </div>
-
-      </div>
+      <div
+        id="carrierMessage"
+        class="carrier-message"
+      ></div>
 
     </section>
 
 
     <!-- DATA BANK -->
 
-    <section class="glass bank-card">
+    <section class="bank-section">
 
-      <div class="card-heading">
+      <div class="section-heading">
 
         <div>
 
-          <span class="label">
+          <p class="section-label">
             DATA BANK
-          </span>
+          </p>
 
           <h2>
-            Save unused data.
+            Don't waste eligible data.
           </h2>
-
-          <p>
-            Transfer today's eligible unused quota
-            into your simulated Data Bank.
-          </p>
 
         </div>
 
-        <div class="bank-icon">
-          🏦
+        <div class="vault-symbol">
+          ◈
         </div>
 
       </div>
 
 
-      <div class="bank-preview">
+      <div class="bank-card">
 
-        <div>
+        <div class="bank-balance">
 
           <span>
-            Eligible to bank
+            BANK BALANCE
           </span>
 
-          <strong id="eligibleBank">
+          <strong id="bankBalance">
             700 MB
           </strong>
 
         </div>
 
-        <div>
+
+        <div class="bank-expiry">
 
           <span>
-            Bank capacity
+            Simulated expiry
           </span>
 
-          <strong>
-            5 GB
+          <strong id="bankExpiry">
+            23h 14m
           </strong>
 
         </div>
 
-      </div>
 
+        <div class="bank-progress">
 
-      <button
-        id="bankButton"
-        class="primary-button"
-      >
-        Bank unused data
-      </button>
-
-
-      <div
-        id="bankMessage"
-        class="message"
-      ></div>
-
-    </section>
-
-
-    <!-- APP USAGE -->
-
-    <section class="section">
-
-      <div class="section-title">
-
-        <div>
-
-          <span class="label">
-            DATA USAGE
-          </span>
-
-          <h2>
-            Use your data.
-          </h2>
+          <div id="bankProgress"></div>
 
         </div>
 
-        <span class="mock-badge">
-          MOCK TRAFFIC
-        </span>
-
-      </div>
-
-
-      <div class="apps-grid">
 
         <button
-          class="app-card glass"
-          data-app="YouTube"
-          data-size="300"
+          id="bankButton"
+          class="bank-button"
         >
-
-          <div class="app-logo youtube">
-            ▶
-          </div>
-
-          <div class="app-info">
-
-            <strong>
-              YouTube
-            </strong>
-
-            <span>
-              Simulate 300 MB
-            </span>
-
-          </div>
-
-          <div class="arrow">
-            ›
-          </div>
-
+          Bank today's unused data
         </button>
 
 
-        <button
-          class="app-card glass"
-          data-app="WhatsApp"
-          data-size="100"
-        >
-
-          <div class="app-logo whatsapp">
-            ☎
-          </div>
-
-          <div class="app-info">
-
-            <strong>
-              WhatsApp
-            </strong>
-
-            <span>
-              Simulate 100 MB
-            </span>
-
-          </div>
-
-          <div class="arrow">
-            ›
-          </div>
-
-        </button>
-
-
-        <button
-          class="app-card glass"
-          data-app="Instagram"
-          data-size="150"
-        >
-
-          <div class="app-logo instagram">
-            ◎
-          </div>
-
-          <div class="app-info">
-
-            <strong>
-              Instagram
-            </strong>
-
-            <span>
-              Simulate 150 MB
-            </span>
-
-          </div>
-
-          <div class="arrow">
-            ›
-          </div>
-
-        </button>
-
-
-        <button
-          class="app-card glass"
-          data-app="Browser"
-          data-size="50"
-        >
-
-          <div class="app-logo browser">
-            ◉
-          </div>
-
-          <div class="app-info">
-
-            <strong>
-              Web Browser
-            </strong>
-
-            <span>
-              Simulate 50 MB
-            </span>
-
-          </div>
-
-          <div class="arrow">
-            ›
-          </div>
-
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <!-- CUSTOM USAGE -->
-
-    <section class="glass custom-card">
-
-      <span class="label">
-        CUSTOM SIMULATION
-      </span>
-
-      <h3>
-        Simulate any application
-      </h3>
-
-      <div class="custom-form">
-
-        <input
-          id="customApp"
-          type="text"
-          placeholder="App name"
-        >
-
-        <input
-          id="customData"
-          type="number"
-          min="1"
-          placeholder="MB"
-        >
-
-        <button
-          id="customUse"
-          class="secondary-button"
-        >
-          Use
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <!-- TIME CONTROL -->
-
-    <section class="glass time-card">
-
-      <div>
-
-        <span class="label">
-          SIMULATED CARRIER TIME
-        </span>
-
-        <strong id="simulatedTime">
-          Day 1 • 17:00
-        </strong>
-
-        <p>
-          Used only for demonstrating daily rollover.
+        <p class="simulation-note">
+          Simulation only. Real rollover requires
+          authorization from your mobile operator.
         </p>
 
       </div>
 
-      <div class="time-buttons">
+    </section>
+
+
+    <!-- USAGE -->
+
+    <section class="usage-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <p class="section-label">
+            USAGE
+          </p>
+
+          <h2>
+            Where your data goes.
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      <div class="usage-tabs">
 
         <button
-          id="advanceHour"
-          class="secondary-button"
+          class="usage-tab active"
+          data-period="today"
         >
-          +1 Hour
+          Today
         </button>
 
         <button
-          id="midnight"
-          class="secondary-button"
+          class="usage-tab"
+          data-period="yesterday"
         >
-          Midnight
+          Yesterday
+        </button>
+
+        <button
+          class="usage-tab"
+          data-period="month"
+        >
+          This month
+        </button>
+
+      </div>
+
+
+      <div
+        id="usageSummary"
+        class="usage-summary"
+      ></div>
+
+
+      <div class="apps-list">
+
+        <button
+          class="app-row"
+          data-app="YouTube"
+          data-usage="300"
+        >
+
+          <div class="app-symbol youtube">
+            ▶
+          </div>
+
+          <div class="app-name">
+            <strong>YouTube</strong>
+            <span>Video</span>
+          </div>
+
+          <strong class="app-value">
+            300 MB
+          </strong>
+
+          <span class="app-arrow">
+            ›
+          </span>
+
+        </button>
+
+
+        <button
+          class="app-row"
+          data-app="WhatsApp"
+          data-usage="100"
+        >
+
+          <div class="app-symbol whatsapp">
+            ●
+          </div>
+
+          <div class="app-name">
+            <strong>WhatsApp</strong>
+            <span>Messaging</span>
+          </div>
+
+          <strong class="app-value">
+            100 MB
+          </strong>
+
+          <span class="app-arrow">
+            ›
+          </span>
+
+        </button>
+
+
+        <button
+          class="app-row"
+          data-app="Browser"
+          data-usage="60"
+        >
+
+          <div class="app-symbol browser">
+            ◉
+          </div>
+
+          <div class="app-name">
+            <strong>Browser</strong>
+            <span>Web</span>
+          </div>
+
+          <strong class="app-value">
+            60 MB
+          </strong>
+
+          <span class="app-arrow">
+            ›
+          </span>
+
+        </button>
+
+
+        <button
+          class="app-row"
+          data-app="Other"
+          data-usage="40"
+        >
+
+          <div class="app-symbol other">
+            +
+          </div>
+
+          <div class="app-name">
+            <strong>Other</strong>
+            <span>System & apps</span>
+          </div>
+
+          <strong class="app-value">
+            40 MB
+          </strong>
+
+          <span class="app-arrow">
+            ›
+          </span>
+
         </button>
 
       </div>
@@ -514,27 +539,27 @@
     </section>
 
 
-    <!-- ACTIVITY -->
+    <!-- HISTORY -->
 
-    <section class="section activity-section">
+    <section class="history-section">
 
-      <div class="section-title">
+      <div class="section-heading">
 
         <div>
 
-          <span class="label">
-            ACTIVITY
-          </span>
+          <p class="section-label">
+            HISTORY
+          </p>
 
           <h2>
-            Data history.
+            Your data timeline.
           </h2>
 
         </div>
 
         <button
           id="clearHistory"
-          class="clear-button"
+          class="text-button"
         >
           Clear
         </button>
@@ -543,61 +568,171 @@
 
 
       <div
-        id="history"
-        class="glass history"
+        id="historyList"
+        class="history-list"
       ></div>
 
     </section>
 
 
-    <!-- CARRIER INTEGRATION -->
+    <!-- ROLLOVER FLOW -->
 
-    <section class="glass integration-card">
+    <section class="rollover-section">
 
-      <div class="integration-icon">
-        ⇄
+      <div class="rollover-box">
+
+        <div class="rollover-number">
+          01
+        </div>
+
+        <div>
+          <p class="section-label">
+            STEP ONE
+          </p>
+
+          <h3>
+            Detect unused data
+          </h3>
+
+          <p>
+            Data Bank calculates the amount available
+            for rollover in the simulation.
+          </p>
+        </div>
+
       </div>
 
-      <div>
 
-        <span class="label">
-          FUTURE CARRIER INTEGRATION
-        </span>
+      <div class="rollover-line"></div>
 
-        <h2>
-          Operator API
-        </h2>
 
-        <p>
-          The production version would use an
-          authorized telecom API to verify quota,
-          eligibility and rollover. The operator's
-          charging system remains authoritative.
-        </p>
+      <div class="rollover-box">
+
+        <div class="rollover-number">
+          02
+        </div>
+
+        <div>
+          <p class="section-label">
+            STEP TWO
+          </p>
+
+          <h3>
+            Store the entitlement
+          </h3>
+
+          <p>
+            Eligible data is placed into the Data Bank.
+          </p>
+        </div>
 
       </div>
 
-      <div class="integration-status">
-        SANDBOX
+
+      <div class="rollover-line"></div>
+
+
+      <div class="rollover-box">
+
+        <div class="rollover-number">
+          03
+        </div>
+
+        <div>
+          <p class="section-label">
+            STEP THREE
+          </p>
+
+          <h3>
+            Use when needed
+          </h3>
+
+          <p>
+            Future authorized carrier traffic could
+            consume the rollover balance.
+          </p>
+        </div>
+
       </div>
 
     </section>
 
+
+    <!-- FOOTER -->
+
+    <footer>
+
+      <div class="footer-main">
+
+        <div class="footer-brand">
+          <div class="db-mark small">
+            DB
+          </div>
+
+          <div>
+            <strong>
+              Data Bank V3
+            </strong>
+
+            <span>
+              Mobile data management concept
+            </span>
+          </div>
+        </div>
+
+
+        <div class="footer-links">
+
+          <a href="#connection">
+            Connection
+          </a>
+
+          <a href="#usage">
+            Usage
+          </a>
+
+          <a href="#bank">
+            Data Bank
+          </a>
+
+          <a href="#carrier">
+            Carrier
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <div class="footer-bottom">
+
+        <span>
+          © 2026 Data Bank V3
+        </span>
+
+        <span>
+          Designed & developed by
+          <strong>
+            Murali Manohar
+          </strong>
+        </span>
+
+        <a href="mailto:muralimanohar.in@gmail.com">
+          muralimanohar.in@gmail.com
+        </a>
+
+        <a href="tel:9553904524">
+          9553904524
+        </a>
+
+      </div>
+
+    </footer>
+
   </main>
 
 
-  <footer>
-
-    <strong>
-      Data Bank V3
-    </strong>
-
-    <span>
-      Mobile data rollover concept
-    </span>
-
-  </footer>
-
+  <!-- TOAST -->
 
   <div
     id="toast"
