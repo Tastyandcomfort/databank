@@ -2,28 +2,29 @@
 
 /* =========================================================
    DATA BANK V3
-   LOCAL MOCK CARRIER ENGINE
+   REAL BROWSER NETWORK DETECTION
+   + LOCAL DATA BANK SIMULATION
    ========================================================= */
 
-const STORAGE_KEY = "dataBankV3";
+
+/* ---------------------------------------------------------
+   STATE
+--------------------------------------------------------- */
+
+const STORAGE_KEY = "DATA_BANK_V3_STATE";
+
 
 const DEFAULT_STATE = {
 
-  carrier: "Demo Carrier",
+  dailyPlanMB: 1500,
 
-  dailyQuotaMB: 1500,
-
-  usedMB: 800,
+  usedTodayMB: 300,
 
   bankedMB: 700,
 
-  rolloverLimitMB: 5000,
+  yesterdayMB: 920,
 
-  day: 1,
-
-  hour: 17,
-
-  minute: 0,
+  monthlyMB: 6840,
 
   history: []
 
@@ -33,46 +34,37 @@ const DEFAULT_STATE = {
 let state = loadState();
 
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
-
-const $ = id =>
-  document.getElementById(id);
-
-
-function cloneDefault() {
-
-  return JSON.parse(
-    JSON.stringify(DEFAULT_STATE)
-  );
-
-}
-
+/* ---------------------------------------------------------
+   STORAGE
+--------------------------------------------------------- */
 
 function loadState() {
 
-  const saved =
-    localStorage.getItem(
-      STORAGE_KEY
-    );
-
-  if (!saved) {
-
-    return cloneDefault();
-
-  }
-
   try {
 
+    const saved =
+      localStorage.getItem(
+        STORAGE_KEY
+      );
+
+    if (!saved) {
+
+      return {
+        ...DEFAULT_STATE
+      };
+
+    }
+
     return {
-      ...cloneDefault(),
+      ...DEFAULT_STATE,
       ...JSON.parse(saved)
     };
 
   } catch {
 
-    return cloneDefault();
+    return {
+      ...DEFAULT_STATE
+    };
 
   }
 
@@ -89,12 +81,24 @@ function saveState() {
 }
 
 
+/* ---------------------------------------------------------
+   HELPERS
+--------------------------------------------------------- */
+
+function $(id) {
+
+  return document.getElementById(id);
+
+}
+
+
 function formatMB(mb) {
 
   mb = Math.max(
     0,
-    Number(mb)
+    Number(mb) || 0
   );
+
 
   if (mb >= 1000) {
 
@@ -107,141 +111,618 @@ function formatMB(mb) {
 
   }
 
+
+  return Math.round(mb) + " MB";
+
+}
+
+
+function showToast(message) {
+
+  const toast =
+    $("toast");
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.add(
+    "show"
+  );
+
+
+  clearTimeout(
+    window.__toastTimer
+  );
+
+
+  window.__toastTimer =
+    setTimeout(() => {
+
+      toast.classList.remove(
+        "show"
+      );
+
+    }, 2600);
+
+}
+
+
+/* =========================================================
+   REAL NETWORK INFORMATION
+   ========================================================= */
+
+function getConnection() {
+
   return (
-    Math.round(mb)
-    + " MB"
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection ||
+    null
   );
 
 }
 
 
-function formatGB(mb) {
+function detectNetwork() {
 
-  return (
-    (Math.max(0, mb) / 1000)
-      .toFixed(2)
-  );
-
-}
+  const connection =
+    getConnection();
 
 
-function todayRemaining() {
+  /*
+   * Browser online status
+   */
 
-  return Math.max(
-    0,
-    state.dailyQuotaMB -
-    state.usedMB
-  );
+  if (!navigator.onLine) {
 
-}
+    $("networkState").textContent =
+      "Offline";
+
+    $("networkPill")
+      .querySelector("i")
+      .style.background =
+      "#e5484d";
+
+  } else {
+
+    $("networkState").textContent =
+      "Online";
+
+    $("networkPill")
+      .querySelector("i")
+      .style.background =
+      "#18a957";
+
+  }
 
 
-function totalAvailable() {
+  /*
+   * Network Information API
+   */
 
-  return (
-    todayRemaining() +
-    state.bankedMB
+  if (!connection) {
+
+    $("connectionType").textContent =
+      "Browser unavailable";
+
+    $("connectionSpeed").textContent =
+      "Not exposed";
+
+    $("connectionLatency").textContent =
+      "Not exposed";
+
+    $("dataSaver").textContent =
+      "Not exposed";
+
+    return;
+
+  }
+
+
+  const type =
+    connection.type;
+
+
+  const effective =
+    connection.effectiveType;
+
+
+  const downlink =
+    connection.downlink;
+
+
+  const rtt =
+    connection.rtt;
+
+
+  const saveData =
+    connection.saveData;
+
+
+  /*
+   * Connection type
+   */
+
+  let connectionText =
+    type || effective || "Unknown";
+
+
+  if (
+    type &&
+    effective &&
+    type !== effective
+  ) {
+
+    connectionText +=
+      ` (${effective})`;
+
+  }
+
+
+  $("connectionType").textContent =
+    connectionText;
+
+
+  /*
+   * Speed
+   */
+
+  if (
+    typeof downlink ===
+    "number"
+  ) {
+
+    $("connectionSpeed").textContent =
+      `${downlink} Mbps`;
+
+  } else {
+
+    $("connectionSpeed").textContent =
+      "Unavailable";
+
+  }
+
+
+  /*
+   * RTT
+   */
+
+  if (
+    typeof rtt ===
+    "number"
+  ) {
+
+    $("connectionLatency").textContent =
+      `${rtt} ms`;
+
+  } else {
+
+    $("connectionLatency").textContent =
+      "Unavailable";
+
+  }
+
+
+  /*
+   * Data Saver
+   */
+
+  if (
+    typeof saveData ===
+    "boolean"
+  ) {
+
+    $("dataSaver").textContent =
+      saveData
+        ? "Enabled"
+        : "Disabled";
+
+  } else {
+
+    $("dataSaver").textContent =
+      "Unavailable";
+
+  }
+
+
+  /*
+   * Re-render if connection changes.
+   */
+
+  connection.addEventListener(
+    "change",
+    detectNetwork
   );
 
 }
 
 
 /* =========================================================
-   UI
+   DATA DASHBOARD
    ========================================================= */
 
-function render() {
+function renderDashboard() {
 
   const remaining =
-    todayRemaining();
-
-  const total =
-    totalAvailable();
-
-  $("carrierName").textContent =
-    state.carrier;
-
-  $("dailyQuota").textContent =
-    formatMB(
-      state.dailyQuotaMB
+    Math.max(
+      0,
+      state.dailyPlanMB -
+      state.usedTodayMB
     );
 
-  $("bankedQuota").textContent =
+
+  const totalAvailable =
+    remaining +
+    state.bankedMB;
+
+
+  $("availableData").textContent =
+    (
+      totalAvailable / 1000
+    ).toFixed(2);
+
+
+  $("dailyPlan").textContent =
+    formatMB(
+      state.dailyPlanMB
+    );
+
+
+  $("todayUsed").textContent =
+    formatMB(
+      state.usedTodayMB
+    );
+
+
+  $("bankedData").textContent =
     formatMB(
       state.bankedMB
     );
 
-  $("usedQuota").textContent =
+
+  $("bankBalance").textContent =
     formatMB(
-      state.usedMB
+      state.bankedMB
     );
 
-  $("totalBalance").textContent =
-    formatGB(total);
 
-  $("usedLabel").textContent =
-    `Used ${formatMB(state.usedMB)}`;
+  /*
+   * Daily usage ring.
+   */
 
-  $("availableLabel").textContent =
-    `${formatMB(total)} available`;
-
-  $("eligibleBank").textContent =
-    formatMB(remaining);
-
-
-  const usage =
+  const dailyPercent =
     Math.min(
       100,
-      (state.usedMB /
-        state.dailyQuotaMB) *
-      100
+      (
+        state.usedTodayMB /
+        state.dailyPlanMB
+      ) * 100
     );
 
 
-  $("usageFill").style.width =
-    `${usage}%`;
+  document
+    .querySelector(".data-ring")
+    .style.background =
+      `conic-gradient(
+        var(--green) 0 ${dailyPercent}%,
+        #e1e2dd ${dailyPercent}% 100%
+      )`;
 
 
-  const availableSpace =
-    state.rolloverLimitMB -
-    state.bankedMB;
+  /*
+   * Bank capacity.
+   */
 
+  const bankPercent =
+    Math.min(
+      100,
+      (
+        state.bankedMB /
+        5000
+      ) * 100
+    );
+
+
+  $("bankProgress").style.width =
+    `${Math.max(
+      5,
+      bankPercent
+    )}%`;
+
+
+  /*
+   * Button.
+   */
 
   $("bankButton").disabled =
-    remaining <= 0 ||
-    availableSpace <= 0;
+    remaining <= 0;
+
+
+  $("bankButton").textContent =
+    remaining > 0
+      ? `Bank ${formatMB(remaining)}`
+      : "No unused data";
+
+}
+
+
+/* =========================================================
+   BANK SIMULATION
+   ========================================================= */
+
+function bankUnusedData() {
+
+  const remaining =
+    Math.max(
+      0,
+      state.dailyPlanMB -
+      state.usedTodayMB
+    );
 
 
   if (remaining <= 0) {
 
-    $("bankButton").textContent =
-      "No unused data";
+    showToast(
+      "No unused daily data available."
+    );
 
-  } else if (availableSpace <= 0) {
-
-    $("bankButton").textContent =
-      "Bank is full";
-
-  } else {
-
-    $("bankButton").textContent =
-      `Bank ${formatMB(
-        Math.min(
-          remaining,
-          availableSpace
-        )
-      )}`;
+    return;
 
   }
 
 
-  $("simulatedTime").textContent =
-    `Day ${state.day} • ` +
-    `${String(state.hour).padStart(2, "0")}:` +
-    `${String(state.minute).padStart(2, "0")}`;
+  const bankCapacity =
+    5000 -
+    state.bankedMB;
 
+
+  if (bankCapacity <= 0) {
+
+    showToast(
+      "Data Bank capacity reached."
+    );
+
+    return;
+
+  }
+
+
+  const amount =
+    Math.min(
+      remaining,
+      bankCapacity
+    );
+
+
+  /*
+   * Simulation:
+   *
+   * We mark the daily quota as consumed
+   * and add the eligible amount to the
+   * Data Bank.
+   */
+
+  state.usedTodayMB +=
+    amount;
+
+
+  state.bankedMB +=
+    amount;
+
+
+  state.history.unshift({
+
+    type: "bank",
+
+    title:
+      "Data added to Data Bank",
+
+    amount,
+
+    time:
+      new Date().toLocaleTimeString(
+        [],
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      )
+
+  });
+
+
+  saveState();
+
+  renderDashboard();
 
   renderHistory();
+
+  showToast(
+    `${formatMB(amount)} added to Data Bank.`
+  );
+
+}
+
+
+/* =========================================================
+   SIMULATED APP USAGE
+   ========================================================= */
+
+function consumeData(
+  app,
+  amount
+) {
+
+  amount =
+    Number(amount);
+
+
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0
+  ) {
+
+    return;
+
+  }
+
+
+  let remaining =
+    amount;
+
+
+  /*
+   * Use today's normal quota first.
+   */
+
+  const dailyRemaining =
+    Math.max(
+      0,
+      state.dailyPlanMB -
+      state.usedTodayMB
+    );
+
+
+  const fromDaily =
+    Math.min(
+      dailyRemaining,
+      remaining
+    );
+
+
+  state.usedTodayMB +=
+    fromDaily;
+
+
+  remaining -=
+    fromDaily;
+
+
+  /*
+   * Then use Data Bank.
+   */
+
+  const fromBank =
+    Math.min(
+      state.bankedMB,
+      remaining
+    );
+
+
+  state.bankedMB -=
+    fromBank;
+
+
+  remaining -=
+    fromBank;
+
+
+  const consumed =
+    fromDaily +
+    fromBank;
+
+
+  if (consumed <= 0) {
+
+    showToast(
+      "No available data."
+    );
+
+    return;
+
+  }
+
+
+  state.monthlyMB +=
+    consumed;
+
+
+  state.history.unshift({
+
+    type: "usage",
+
+    title:
+      `${app} used data`,
+
+    amount:
+      consumed,
+
+    time:
+      new Date().toLocaleTimeString(
+        [],
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      )
+
+  });
+
+
+  saveState();
+
+  renderDashboard();
+
+  renderHistory();
+
+
+  if (remaining > 0) {
+
+    showToast(
+      `${formatMB(consumed)} used. ${formatMB(remaining)} unavailable.`
+    );
+
+  } else {
+
+    showToast(
+      `${app}: ${formatMB(consumed)} used.`
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   USAGE TABS
+   ========================================================= */
+
+function renderUsage(period) {
+
+  const summary =
+    $("usageSummary");
+
+
+  if (period === "yesterday") {
+
+    summary.textContent =
+      `Yesterday: ${formatMB(
+        state.yesterdayMB
+      )} mobile data used.`;
+
+    return;
+
+  }
+
+
+  if (period === "month") {
+
+    summary.textContent =
+      `This month: ${formatMB(
+        state.monthlyMB
+      )} mobile data used.`;
+
+    return;
+
+  }
+
+
+  summary.textContent =
+    `Today: ${formatMB(
+      state.usedTodayMB
+    )} mobile data used.`;
 
 }
 
@@ -250,45 +731,10 @@ function render() {
    HISTORY
    ========================================================= */
 
-function addHistory(
-  title,
-  amount,
-  direction,
-  icon
-) {
-
-  state.history.unshift({
-
-    title,
-    amount,
-    direction,
-    icon,
-
-    day: state.day,
-
-    hour: state.hour,
-
-    minute: state.minute,
-
-    timestamp:
-      Date.now()
-
-  });
-
-
-  state.history =
-    state.history.slice(
-      0,
-      80
-    );
-
-}
-
-
 function renderHistory() {
 
-  const container =
-    $("history");
+  const list =
+    $("historyList");
 
 
   if (
@@ -296,10 +742,10 @@ function renderHistory() {
     state.history.length === 0
   ) {
 
-    container.innerHTML =
+    list.innerHTML =
       `
-        <div class="empty">
-          No data activity yet.
+        <div class="history-empty">
+          No Data Bank activity yet.
         </div>
       `;
 
@@ -308,53 +754,35 @@ function renderHistory() {
   }
 
 
-  container.innerHTML =
+  list.innerHTML =
     state.history
+      .slice(0, 15)
       .map(item => {
 
-        const positive =
-          item.direction === "positive";
-
-
         const sign =
-          positive
+          item.type === "bank"
             ? "+"
             : "−";
 
 
-        const className =
-          positive
-            ? "positive"
-            : "negative";
+        const color =
+          item.type === "bank"
+            ? "var(--green)"
+            : "var(--text)";
 
 
         return `
-          <div class="history-row">
+          <div class="history-item">
 
-            <div class="history-left">
+            <span>
+              ${escapeHTML(item.title)}
+              <br>
+              ${escapeHTML(item.time)}
+            </span>
 
-              <div class="history-icon">
-                ${item.icon || "•"}
-              </div>
-
-              <div>
-
-                <div class="history-title">
-                  ${escapeHTML(item.title)}
-                </div>
-
-                <div class="history-time">
-                  Day ${item.day}
-                  •
-                  ${String(item.hour).padStart(2, "0")}:
-                  ${String(item.minute).padStart(2, "0")}
-                </div>
-
-              </div>
-
-            </div>
-
-            <strong class="${className}">
+            <strong
+              style="color:${color}"
+            >
               ${sign}${formatMB(item.amount)}
             </strong>
 
@@ -380,442 +808,23 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   BANK DATA
+   CARRIER BUTTON
    ========================================================= */
 
-function bankUnusedData() {
+function carrierIntegration() {
 
-  const unused =
-    todayRemaining();
-
-
-  if (unused <= 0) {
-
-    showToast(
-      "There is no unused data to bank."
-    );
-
-    return;
-
-  }
-
-
-  const space =
-    Math.max(
-      0,
-      state.rolloverLimitMB -
-      state.bankedMB
-    );
-
-
-  if (space <= 0) {
-
-    showToast(
-      "Your Data Bank is full."
-    );
-
-    return;
-
-  }
-
-
-  const amount =
-    Math.min(
-      unused,
-      space
-    );
-
-
-  /*
-   * Mock carrier behavior:
-   *
-   * Today's unused quota is converted
-   * into a rollover entitlement.
-   */
-
-  state.usedMB += amount;
-
-  state.bankedMB += amount;
-
-
-  addHistory(
-    "Data banked",
-    amount,
-    "positive",
-    "🏦"
-  );
-
-
-  $("bankMessage").textContent =
-    `${formatMB(amount)} added to Data Bank.`;
-
-
-  saveState();
-
-  render();
+  $("carrierMessage").textContent =
+    "No carrier API is connected. The website can display carrier data only after an authorized operator integration is provided.";
 
   showToast(
-    `${formatMB(amount)} banked successfully.`
+    "Carrier integration is not connected."
   );
 
 }
 
 
 /* =========================================================
-   APP DATA USAGE
-   ========================================================= */
-
-function consumeData(
-  app,
-  amount
-) {
-
-  amount =
-    Number(amount);
-
-
-  if (
-    !app ||
-    !Number.isFinite(amount) ||
-    amount <= 0
-  ) {
-
-    showToast(
-      "Invalid data amount."
-    );
-
-    return;
-
-  }
-
-
-  let remaining =
-    amount;
-
-
-  /*
-   * First consume today's quota.
-   */
-
-  const dailyAvailable =
-    todayRemaining();
-
-
-  const fromDaily =
-    Math.min(
-      dailyAvailable,
-      remaining
-    );
-
-
-  state.usedMB +=
-    fromDaily;
-
-
-  remaining -=
-    fromDaily;
-
-
-  /*
-   * Then consume rollover.
-   */
-
-  const fromBank =
-    Math.min(
-      state.bankedMB,
-      remaining
-    );
-
-
-  state.bankedMB -=
-    fromBank;
-
-
-  remaining -=
-    fromBank;
-
-
-  const consumed =
-    fromDaily +
-    fromBank;
-
-
-  if (consumed > 0) {
-
-    addHistory(
-      app,
-      consumed,
-      "negative",
-      "📡"
-    );
-
-  }
-
-
-  saveState();
-
-  render();
-
-
-  if (remaining > 0) {
-
-    showToast(
-      `${app}: ${formatMB(remaining)} unavailable.`
-    );
-
-  } else if (fromBank > 0) {
-
-    showToast(
-      `${app} used ${formatMB(consumed)}, including rollover.`
-    );
-
-  } else {
-
-    showToast(
-      `${app} used ${formatMB(consumed)}.`
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   MIDNIGHT
-   ========================================================= */
-
-function simulateMidnight() {
-
-  const unused =
-    todayRemaining();
-
-
-  if (unused > 0) {
-
-    const space =
-      Math.max(
-        0,
-        state.rolloverLimitMB -
-        state.bankedMB
-      );
-
-
-    const rollover =
-      Math.min(
-        unused,
-        space
-      );
-
-
-    if (rollover > 0) {
-
-      state.bankedMB +=
-        rollover;
-
-      state.usedMB +=
-        rollover;
-
-
-      addHistory(
-        "Automatic rollover",
-        rollover,
-        "positive",
-        "↻"
-      );
-
-    }
-
-  }
-
-
-  state.day += 1;
-
-  state.hour = 0;
-
-  state.minute = 0;
-
-  /*
-   * New daily allowance.
-   */
-
-  state.usedMB = 0;
-
-
-  addHistory(
-    "New daily allowance",
-    state.dailyQuotaMB,
-    "positive",
-    "☀"
-  );
-
-
-  $("bankMessage").textContent =
-    "New simulated day started.";
-
-
-  saveState();
-
-  render();
-
-  showToast(
-    "Midnight simulated."
-  );
-
-}
-
-
-/* =========================================================
-   TIME
-   ========================================================= */
-
-function advanceHour() {
-
-  state.hour += 1;
-
-
-  if (state.hour >= 24) {
-
-    simulateMidnight();
-
-    return;
-
-  }
-
-
-  saveState();
-
-  render();
-
-}
-
-
-/* =========================================================
-   CUSTOM TRAFFIC
-   ========================================================= */
-
-function customTraffic() {
-
-  const app =
-    $("customApp")
-      .value
-      .trim();
-
-
-  const amount =
-    Number(
-      $("customData").value
-    );
-
-
-  if (
-    !app ||
-    !Number.isFinite(amount) ||
-    amount <= 0
-  ) {
-
-    showToast(
-      "Enter an app name and MB amount."
-    );
-
-    return;
-
-  }
-
-
-  consumeData(
-    app,
-    amount
-  );
-
-
-  $("customApp").value = "";
-
-  $("customData").value = "";
-
-}
-
-
-/* =========================================================
-   THEME
-   ========================================================= */
-
-function toggleTheme() {
-
-  document.body.classList.toggle(
-    "dark"
-  );
-
-
-  localStorage.setItem(
-    "dataBankV3Theme",
-    document.body.classList.contains("dark")
-      ? "dark"
-      : "light"
-  );
-
-}
-
-
-function loadTheme() {
-
-  const theme =
-    localStorage.getItem(
-      "dataBankV3Theme"
-    );
-
-
-  if (theme === "dark") {
-
-    document.body.classList.add(
-      "dark"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   TOAST
-   ========================================================= */
-
-let toastTimer;
-
-
-function showToast(message) {
-
-  const toast =
-    $("toast");
-
-
-  toast.textContent =
-    message;
-
-
-  toast.classList.add(
-    "show"
-  );
-
-
-  clearTimeout(
-    toastTimer
-  );
-
-
-  toastTimer =
-    setTimeout(() => {
-
-      toast.classList.remove(
-        "show"
-      );
-
-    }, 2800);
-
-}
-
-
-/* =========================================================
-   EVENT LISTENERS
+   EVENTS
    ========================================================= */
 
 $("bankButton")
@@ -825,32 +834,70 @@ $("bankButton")
   );
 
 
-$("themeToggle")
+$("carrierButton")
   .addEventListener(
     "click",
-    toggleTheme
+    carrierIntegration
   );
 
 
-$("advanceHour")
-  .addEventListener(
-    "click",
-    advanceHour
-  );
+document
+  .querySelectorAll(
+    ".app-row"
+  )
+  .forEach(row => {
+
+    row.addEventListener(
+      "click",
+      () => {
+
+        consumeData(
+          row.dataset.app,
+          Number(
+            row.dataset.usage
+          )
+        );
+
+      }
+    );
+
+  });
 
 
-$("midnight")
-  .addEventListener(
-    "click",
-    simulateMidnight
-  );
+document
+  .querySelectorAll(
+    ".usage-tab"
+  )
+  .forEach(tab => {
+
+    tab.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll(
+            ".usage-tab"
+          )
+          .forEach(button =>
+            button.classList.remove(
+              "active"
+            )
+          );
 
 
-$("customUse")
-  .addEventListener(
-    "click",
-    customTraffic
-  );
+        tab.classList.add(
+          "active"
+        );
+
+
+        renderUsage(
+          tab.dataset.period
+        );
+
+      }
+    );
+
+  });
 
 
 $("clearHistory")
@@ -862,7 +909,7 @@ $("clearHistory")
 
       saveState();
 
-      render();
+      renderHistory();
 
       showToast(
         "History cleared."
@@ -872,125 +919,28 @@ $("clearHistory")
   );
 
 
-/* APP TRAFFIC */
-
-document
-  .querySelectorAll(
-    ".app-card"
-  )
-  .forEach(button => {
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        consumeData(
-          button.dataset.app,
-          Number(
-            button.dataset.size
-          )
-        );
-
-      }
-    );
-
-  });
+window.addEventListener(
+  "online",
+  detectNetwork
+);
 
 
-/* ENTER KEY */
-
-$("customApp")
-  .addEventListener(
-    "keydown",
-    event => {
-
-      if (event.key === "Enter") {
-
-        customTraffic();
-
-      }
-
-    }
-  );
-
-
-$("customData")
-  .addEventListener(
-    "keydown",
-    event => {
-
-      if (event.key === "Enter") {
-
-        customTraffic();
-
-      }
-
-    }
-  );
+window.addEventListener(
+  "offline",
+  detectNetwork
+);
 
 
 /* =========================================================
    START
    ========================================================= */
 
-loadTheme();
+renderDashboard();
 
-render();
+renderUsage(
+  "today"
+);
 
+renderHistory();
 
-/* =========================================================
-   DEBUG / FUTURE API PLACEHOLDER
-   =========================================================
-
-   The production carrier integration would eventually
-   replace these mock functions with an authorized API.
-
-   Example future flow:
-
-   DataBankV3.carrier.getBalance()
-   DataBankV3.carrier.getEligibility()
-   DataBankV3.carrier.bankQuota(amount)
-
-   Those functions must communicate with an
-   operator-authorized backend/API.
-
-   ========================================================= */
-
-window.DataBankV3 = {
-
-  getState() {
-    return structuredClone(state);
-  },
-
-  bank() {
-    bankUnusedData();
-  },
-
-  use(app, mb) {
-    consumeData(app, mb);
-  },
-
-  midnight() {
-    simulateMidnight();
-  },
-
-  reset() {
-
-    localStorage.removeItem(
-      STORAGE_KEY
-    );
-
-    state =
-      cloneDefault();
-
-    saveState();
-
-    render();
-
-    showToast(
-      "Data Bank reset."
-    );
-
-  }
-
-};
+detectNetwork();
